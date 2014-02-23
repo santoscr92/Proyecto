@@ -38,8 +38,8 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
     private SoundClip rat;    // Objeto AudioClip
     private SoundClip bomb;    //Objeto AudioClip
     private SoundClip teleport;
-    private Bueno dumbo;    // Objeto de la clase Bueno
-    private Malo raton;    //Objeto de la clase Malo
+    private Bueno pelota;    // Objeto de la clase Bueno
+    private Malo caja;    //Objeto de la clase Malo
     private int ancho;  //Ancho del elefante
     private int alto;   //Alto del elefante
     private ImageIcon elefante; // Imagen del elefante.
@@ -50,6 +50,11 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
     private int vidas = 6;
     private int score = 0;
     private boolean pausa = false;
+    private boolean clic = false; //para saber cuando hace clic
+    private boolean up,down,right,left; //movimiento de teclado
+    private boolean pchoco; // bool pelota choco
+    private int angulo; // angulo de la pelota
+    private int px,py; // posicion de la pelota con formula
     
     public examen() {
         init();
@@ -63,15 +68,15 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
         this.setSize(900, 700);
         URL eURL = this.getClass().getResource("Imagenes/bola.png");
         int dposy = getHeight() / 2;
-        dumbo = new Bueno(15, dposy , Toolkit.getDefaultToolkit().getImage(eURL));
-        //dumbo.setPosX((int) (getWidth()/2));
-        //dumbo.setPosY(getHeight());
+        pelota = new Bueno(15, dposy , Toolkit.getDefaultToolkit().getImage(eURL));
+        //pelota.setPosX((int) (getWidth()/2));
+        //pelota.setPosY(getHeight());
         int posrX =  getWidth()/2 ;    //posision x es tres cuartos del applet
         int posrY =   getHeight() ;  //posision y es tres cuartos del applet
         URL rURL = this.getClass().getResource("Imagenes/caja.png");
-        raton = new Malo(posrX, posrY, Toolkit.getDefaultToolkit().getImage(rURL));
-        raton.setPosX(raton.getPosX() - raton.getAncho());
-        raton.setPosY(raton.getPosY() - raton.getAlto());
+        caja = new Malo(posrX, posrY, Toolkit.getDefaultToolkit().getImage(rURL));
+        caja.setPosX(caja.getPosX() - caja.getAncho());
+        caja.setPosY(caja.getPosY() - caja.getAlto());
         setBackground(Color.white);
         addKeyListener(this);
         URL goURL = this.getClass().getResource("Imagenes/perder.png");
@@ -86,10 +91,19 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
         elefante = new ImageIcon(Toolkit.getDefaultToolkit().getImage(eURL));
         ancho = elefante.getIconWidth();
         alto = elefante.getIconHeight();
-        //ancho2 = raton.getIconWidth();
-        // alto2 = raton.getIconHeight();
+        //ancho2 = caja.getIconWidth();
+        // alto2 = caja.getIconHeight();
         addMouseListener(this);
         addMouseMotionListener(this);  
+        
+        // variable de la pelota
+        angulo = (int) ((Math.random() * (85 - 35)) + 35);
+        
+        
+        //movimiento de pelota
+        velocidad = (int) ((Math.random() * (7 - 3)) + 3);
+        px =  velocidad * (int)(Math.cos(angulo));
+        
         
   
     }
@@ -118,7 +132,27 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
     
     public void actualiza() {
         
-           
+        if(left)
+        {
+            caja.setPosX(caja.getPosX() - 5);
+            left = false;
+        }
+        else if(right)
+        {
+            caja.setPosX(caja.getPosX() + 5);
+            right = false;
+        }
+        
+        //si choca con la ventana se invierte la velocidad en X
+        if(pchoco)
+        {
+            px *= -1;
+            pchoco = false;
+        }
+        
+        //actualiza la posicion de la pelota
+        pelota.setPosX(pelota.getPosX() + px);
+        
         }
         
         
@@ -126,19 +160,27 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
  
     public void checaColision() {
         
+       /* 
+        if (pelota.getPosX() + pelota.getAncho() > getWidth()) {
+            pelota.setPosX(getWidth() - pelota.getAncho());
+        }
+        else if (pelota.getPosX() < 0) {
+            pelota.setPosX(0);
+        }
+        else if (pelota.getPosY() + pelota.getAlto() > getHeight()) {
+            pelota.setPosY(getHeight() - pelota.getAlto());
+        }
+        else if (pelota.getPosY() < 0) {
+            pelota.setPosY(0);
+        }
+        */
         
-        if (dumbo.getPosX() + dumbo.getAncho() > getWidth()) {
-            dumbo.setPosX(getWidth() - dumbo.getAncho());
+        if(pelota.getPosX() + pelota.getAncho() >= getWidth() || pelota.getPosX() <= 0)
+        {
+            pchoco = true;
         }
-        if (dumbo.getPosX() < 0) {
-            dumbo.setPosX(0);
-        }
-        if (dumbo.getPosY() + dumbo.getAlto() > getHeight()) {
-            dumbo.setPosY(getHeight() - dumbo.getAlto());
-        }
-        if (dumbo.getPosY() < 0) {
-            dumbo.setPosY(0);
-        }
+        
+        
     }
  
     public void paint(Graphics g) {
@@ -163,10 +205,10 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
     
     public void paint1(Graphics g) {
         if (vidas>0){
-        if (dumbo != null && raton != null) {
+        if (pelota != null && caja != null) {
             //Dibuja la imagen en la posicion actualizada
-            g.drawImage(dumbo.getImagenI(), dumbo.getPosX(), dumbo.getPosY(), this);
-            g.drawImage(raton.getImagenI(), raton.getPosX(), raton.getPosY(), this);
+            g.drawImage(pelota.getImagenI(), pelota.getPosX(), pelota.getPosY(), this);
+            g.drawImage(caja.getImagenI(), caja.getPosX(), caja.getPosY(), this);
  
         } else {
             //Da un mensaje mientras se carga el dibujo
@@ -178,7 +220,7 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
         }
         
         //
-        g.drawImage(raton.getImagenI(), raton.getPosX(), raton.getPosY(), this);
+        g.drawImage(caja.getImagenI(), caja.getPosX(), caja.getPosY(), this);
         
         
         g.setColor(Color.black);
@@ -192,7 +234,7 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
             pausa = !pausa;
         }
        
-        /*
+        
         if (e.getKeyCode() == KeyEvent.VK_UP) //Presiono flecha arriba
         {    
             up = true;
@@ -209,7 +251,7 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
                 {    
 			right = true;
 		}
-        */
+        
          
     }
  
@@ -243,6 +285,10 @@ public class examen extends JFrame implements Runnable, KeyListener,MouseListene
      public void mouseClicked(MouseEvent e) {
         x1 = e.getX();
         y1 = e.getY();
+        if(pelota.tiene(x1, y1))
+        {
+            clic = true;
+        }
         
     }
  

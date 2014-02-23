@@ -21,9 +21,14 @@ public class Bueno extends Base{
         private static final String pausado = "PAUSADO";  
         
     
-	public Bueno(int posX,int posY,Image image){
+	public Bueno(int posX,int posY,Image image)
+        {
 		super(posX,posY,image);	
 	}
         
+        public boolean tiene (int posX,int posY)
+        {
+            return getPerimetro().contains(posX, posY);
+        }
         
 }

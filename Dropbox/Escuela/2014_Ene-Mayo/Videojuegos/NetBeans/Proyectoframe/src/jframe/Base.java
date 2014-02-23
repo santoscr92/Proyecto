@@ -126,7 +126,9 @@ public class Base {
      * @param obj
      * @return
      */
-    public boolean tiene (Base obj){
+    /*
+        public boolean tiene (Base obj){
             return getPerimetro().contains(posX, posY);
         }
+    */
 }
